@@ -6,6 +6,10 @@ import IrrigationSystem from './IrrigationSystem';
 import NutritionAnalysis from './NutritionAnalysis';
 import CropProgress from './CropProgress';
 import Simulator from '../simulator/Simulator';
+import CropSelector from '../crops/CropSelector';
+import ManualInput from '../manual/ManualInput';
+import DemoModeToggle from '../demo/DemoModeToggle';
+import cropConditions from '../../data/cropConditions';
 
 const Dashboard = () => {
   const { translate } = useLanguage();
@@ -39,6 +43,8 @@ const Dashboard = () => {
   });
   
   const [loading, setLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [selectedCrop, setSelectedCrop] = useState('wheat');
   
   // Simulate fetching data from API
   useEffect(() => {
@@ -62,17 +68,66 @@ const Dashboard = () => {
     
     fetchData();
     
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setSensorData(prevData => ({
-        soilMoisture: Math.max(30, Math.min(80, prevData.soilMoisture + (Math.random() * 6 - 3))),
-        temperature: Math.max(22, Math.min(35, prevData.temperature + (Math.random() * 2 - 1))),
-        humidity: Math.max(40, Math.min(90, prevData.humidity + (Math.random() * 4 - 2)))
-      }));
-    }, 5000);
+    // Simulate real-time updates only in demo mode with interdependence
+    let interval;
+    if (isDemoMode) {
+      interval = setInterval(() => {
+        setSensorData(prevData => {
+          // Get crop-specific conditions
+          const crop = cropConditions[selectedCrop];
+          
+          // Calculate temperature change within crop-specific range
+          const tempChange = Math.random() * 2 - 1;
+          const newTemp = Math.max(
+            crop.temperature.min, 
+            Math.min(crop.temperature.max, prevData.temperature + tempChange)
+          );
+          
+          // Calculate humidity change within crop-specific range
+          const humidityChange = Math.random() * 4 - 2;
+          const newHumidity = Math.max(
+            crop.humidity.min, 
+            Math.min(crop.humidity.max, prevData.humidity + humidityChange)
+          );
+          
+          // Calculate soil moisture with interdependence
+          // Temperature increase causes moisture decrease (evaporation)
+          const evaporationEffect = tempChange > 0 ? -tempChange * 0.8 : 0;
+          
+          // Humidity increase causes moisture increase (water retention)
+          const humidityEffect = humidityChange > 0 ? humidityChange * 0.3 : 0;
+          
+          // Random factor for natural variation
+          const randomFactor = Math.random() * 2 - 1;
+          
+          // Calculate new soil moisture within crop-specific range
+          const moistureChange = evaporationEffect + humidityEffect + randomFactor;
+          const newMoisture = Math.max(
+            crop.soilMoisture.min, 
+            Math.min(crop.soilMoisture.max, prevData.soilMoisture + moistureChange)
+          );
+          
+          return {
+            soilMoisture: newMoisture,
+            temperature: newTemp,
+            humidity: newHumidity
+          };
+        });
+      }, 3000); // Update every 3 seconds for more dynamic simulation
+    }
     
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isDemoMode, selectedCrop]);
+  
+  // Handle manual input updates
+  const handleManualInputUpdate = (newData) => {
+    setSensorData(prevData => ({
+      ...prevData,
+      ...newData
+    }));
+  };
   
   if (loading) {
     return <div className="loading-container"><div className="loading"></div></div>;
@@ -82,6 +137,28 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <h1 className="dashboard-title">{translate('dashboard.title')}</h1>
       
+      <div className="row">
+        <div className="col-md-6">
+          <DemoModeToggle 
+            isDemoMode={isDemoMode} 
+            onToggle={setIsDemoMode} 
+          />
+        </div>
+        <div className="col-md-6">
+          <CropSelector 
+            selectedCrop={selectedCrop} 
+            onSelectCrop={setSelectedCrop} 
+          />
+        </div>
+      </div>
+      
+      {!isDemoMode && (
+        <ManualInput 
+          initialValues={sensorData}
+          onSubmit={handleManualInputUpdate}
+        />
+      )}
+      
       <Simulator />
       
       <div className="row">
@@ -90,9 +167,20 @@ const Dashboard = () => {
             <FaTint className="sensor-icon" />
             <div className="sensor-value">{sensorData.soilMoisture.toFixed(2)}%</div>
             <div className="sensor-label">{translate('dashboard.soilMoisture')}</div>
-            {sensorData.soilMoisture < 40 && (
+            {sensorData.soilMoisture < cropConditions[selectedCrop].soilMoisture.optimal[0] && (
               <div className="alert alert-danger mt-3">
-                {translate('dashboard.lowMoisture')}
+                ⚠ {translate('dashboard.lowMoisture')} — {translate('dashboard.irrigationNeeded')}
+              </div>
+            )}
+            {sensorData.soilMoisture >= cropConditions[selectedCrop].soilMoisture.optimal[0] && 
+             sensorData.soilMoisture <= cropConditions[selectedCrop].soilMoisture.optimal[1] && (
+              <div className="alert alert-success mt-3">
+                🌧 {translate('dashboard.moistureOptimal')}
+              </div>
+            )}
+            {sensorData.soilMoisture > cropConditions[selectedCrop].soilMoisture.optimal[1] && (
+              <div className="alert alert-warning mt-3">
+                💧 {cropConditions[selectedCrop].soilMoisture.description}
               </div>
             )}
           </div>
@@ -103,6 +191,18 @@ const Dashboard = () => {
             <FaThermometerHalf className="sensor-icon" />
             <div className="sensor-value">{sensorData.temperature.toFixed(2)}°C</div>
             <div className="sensor-label">{translate('dashboard.temperature')}</div>
+            {(sensorData.temperature < cropConditions[selectedCrop].temperature.optimal[0] || 
+              sensorData.temperature > cropConditions[selectedCrop].temperature.optimal[1]) && (
+              <div className="alert alert-warning mt-3">
+                🌡️ {cropConditions[selectedCrop].temperature.description}
+              </div>
+            )}
+            {sensorData.temperature >= cropConditions[selectedCrop].temperature.optimal[0] && 
+             sensorData.temperature <= cropConditions[selectedCrop].temperature.optimal[1] && (
+              <div className="alert alert-success mt-3">
+                ✅ Optimal temperature for {cropConditions[selectedCrop].name}
+              </div>
+            )}
           </div>
         </div>
         
@@ -111,6 +211,18 @@ const Dashboard = () => {
             <FaCloud className="sensor-icon" />
             <div className="sensor-value">{sensorData.humidity.toFixed(2)}%</div>
             <div className="sensor-label">{translate('dashboard.humidity')}</div>
+            {(sensorData.humidity < cropConditions[selectedCrop].humidity.optimal[0] || 
+              sensorData.humidity > cropConditions[selectedCrop].humidity.optimal[1]) && (
+              <div className="alert alert-warning mt-3">
+                💨 {cropConditions[selectedCrop].humidity.description}
+              </div>
+            )}
+            {sensorData.humidity >= cropConditions[selectedCrop].humidity.optimal[0] && 
+             sensorData.humidity <= cropConditions[selectedCrop].humidity.optimal[1] && (
+              <div className="alert alert-success mt-3">
+                ✅ Optimal humidity for {cropConditions[selectedCrop].name}
+              </div>
+            )}
           </div>
         </div>
       </div>

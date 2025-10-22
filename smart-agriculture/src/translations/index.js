@@ -14,7 +14,9 @@ const en = {
   "dashboard.soilMoisture": "Soil Moisture",
   "dashboard.temperature": "Temperature",
   "dashboard.humidity": "Humidity",
-  "dashboard.lowMoisture": "Low moisture! Irrigation required.",
+  "dashboard.lowMoisture": "Low moisture!",
+  "dashboard.irrigationNeeded": "Irrigation needed",
+  "dashboard.moistureOptimal": "Soil moisture optimal",
   "dashboard.weather": "Weather Forecast",
   "dashboard.currentWeather": "Current Weather",
   "dashboard.today": "Today",
@@ -28,7 +30,28 @@ const en = {
   
   // Demo Mode
   "demo.title": "Demo Mode",
-  "demo.active": "Demo Mode Active - Using Simulated Data"
+  "demo.active": "Demo Mode Active - Using Simulated Data",
+  "demo.toggle": "Toggle Demo Mode",
+  "demo.on": "On",
+  "demo.off": "Off",
+  
+  // Crops
+  "crops.title": "Crop Selection",
+  "crops.wheat": "Wheat",
+  "crops.rice": "Rice",
+  "crops.corn": "Corn",
+  "crops.cotton": "Cotton",
+  "crops.sugarcane": "Sugarcane",
+  "crops.select": "Select Crop",
+  
+  // Manual Input
+  "manual.title": "Manual Input",
+  "manual.soilMoisture": "Enter Soil Moisture (%)",
+  "manual.temperature": "Enter Temperature (°C)",
+  "manual.humidity": "Enter Humidity (%)",
+  "manual.submit": "Submit Values",
+  "manual.reset": "Reset Values",
+  "manual.instructions": "Enter values manually when Demo Mode is off"
 };
 
 // Hindi translations
@@ -47,7 +70,9 @@ const hi = {
   "dashboard.soilMoisture": "मिट्टी की नमी",
   "dashboard.temperature": "तापमान",
   "dashboard.humidity": "आर्द्रता",
-  "dashboard.lowMoisture": "कम नमी! सिंचाई की आवश्यकता है।",
+  "dashboard.lowMoisture": "कम नमी!",
+  "dashboard.irrigationNeeded": "सिंचाई की आवश्यकता है",
+  "dashboard.moistureOptimal": "मिट्टी की नमी इष्टतम है",
   "dashboard.weather": "मौसम का पूर्वानुमान",
   "dashboard.currentWeather": "वर्तमान मौसम",
   "dashboard.today": "आज",
@@ -61,7 +86,28 @@ const hi = {
   
   // Demo Mode
   "demo.title": "डेमो मोड",
-  "demo.active": "डेमो मोड सक्रिय - सिमुलेटेड डेटा का उपयोग कर रहा है"
+  "demo.active": "डेमो मोड सक्रिय - सिमुलेटेड डेटा का उपयोग कर रहा है",
+  "demo.toggle": "डेमो मोड टॉगल करें",
+  "demo.on": "चालू",
+  "demo.off": "बंद",
+  
+  // Crops
+  "crops.title": "फसल चयन",
+  "crops.wheat": "गेहूं",
+  "crops.rice": "चावल",
+  "crops.corn": "मक्का",
+  "crops.cotton": "कपास",
+  "crops.sugarcane": "गन्ना",
+  "crops.select": "फसल चुनें",
+  
+  // Manual Input
+  "manual.title": "मैनुअल इनपुट",
+  "manual.soilMoisture": "मिट्टी की नमी दर्ज करें (%)",
+  "manual.temperature": "तापमान दर्ज करें (°C)",
+  "manual.humidity": "आर्द्रता दर्ज करें (%)",
+  "manual.submit": "मान जमा करें",
+  "manual.reset": "मान रीसेट करें",
+  "manual.instructions": "डेमो मोड बंद होने पर मैन्युअल रूप से मान दर्ज करें"
 };
 
 // Tamil translations
@@ -80,7 +126,9 @@ const ta = {
   "dashboard.soilMoisture": "மண் ஈரப்பதம்",
   "dashboard.temperature": "வெப்பநிலை",
   "dashboard.humidity": "ஈரப்பதம்",
-  "dashboard.lowMoisture": "குறைந்த ஈரப்பதம்! நீர்ப்பாசனம் தேவை.",
+  "dashboard.lowMoisture": "குறைந்த ஈரப்பதம்!",
+  "dashboard.irrigationNeeded": "நீர்ப்பாசனம் தேவை",
+  "dashboard.moistureOptimal": "மண் ஈரப்பதம் சிறந்தது",
   "dashboard.weather": "வானிலை முன்னறிவிப்பு",
   "dashboard.currentWeather": "தற்போதைய வானிலை",
   "dashboard.today": "இன்று",
@@ -94,7 +142,28 @@ const ta = {
   
   // Demo Mode
   "demo.title": "டெமோ பயன்முறை",
-  "demo.active": "டெமோ பயன்முறை செயலில் உள்ளது - உருவகப்படுத்தப்பட்ட தரவைப் பயன்படுத்துகிறது"
+  "demo.active": "டெமோ பயன்முறை செயலில் உள்ளது - உருவகப்படுத்தப்பட்ட தரவைப் பயன்படுத்துகிறது",
+  "demo.toggle": "டெமோ பயன்முறை மாற்று",
+  "demo.on": "இயக்கு",
+  "demo.off": "நிறுத்து",
+  
+  // Crops
+  "crops.title": "பயிர் தேர்வு",
+  "crops.wheat": "கோதுமை",
+  "crops.rice": "அரிசி",
+  "crops.corn": "மக்காச்சோளம்",
+  "crops.cotton": "பருத்தி",
+  "crops.sugarcane": "கரும்பு",
+  "crops.select": "பயிரைத் தேர்ந்தெடுக்கவும்",
+  
+  // Manual Input
+  "manual.title": "கைமுறை உள்ளீடு",
+  "manual.soilMoisture": "மண் ஈரப்பதத்தை உள்ளிடவும் (%)",
+  "manual.temperature": "வெப்பநிலையை உள்ளிடவும் (°C)",
+  "manual.humidity": "ஈரப்பதத்தை உள்ளிடவும் (%)",
+  "manual.submit": "மதிப்புகளை சமர்ப்பிக்கவும்",
+  "manual.reset": "மதிப்புகளை மீட்டமைக்கவும்",
+  "manual.instructions": "டெமோ பயன்முறை முடக்கப்பட்டிருக்கும்போது கைமுறையாக மதிப்புகளை உள்ளிடவும்"
 };
 
 const translations = {
