@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import './CropSelector.css';
 
-const CropSelector = ({ onCropSelect }) => {
+const CropSelector = ({ selectedCrop: selectedCropProp = 'wheat', onSelectCrop }) => {
   const { translate } = useLanguage();
-  const [selectedCrop, setSelectedCrop] = useState('wheat');
+  // Fully controlled: use the prop value directly to avoid desync
+  const selectedCrop = selectedCropProp || 'wheat';
 
   const crops = [
     { id: 'wheat', name: translate('crops.wheat') },
@@ -16,9 +17,8 @@ const CropSelector = ({ onCropSelect }) => {
 
   const handleCropChange = (e) => {
     const crop = e.target.value;
-    setSelectedCrop(crop);
-    if (onCropSelect) {
-      onCropSelect(crop);
+    if (onSelectCrop) {
+      onSelectCrop(crop);
     }
   };
 
@@ -26,8 +26,8 @@ const CropSelector = ({ onCropSelect }) => {
     <div className="crop-selector">
       <h3>{translate('crops.title')}</h3>
       <div className="crop-select-container">
-        <select 
-          value={selectedCrop} 
+        <select
+          value={selectedCrop}
           onChange={handleCropChange}
           className="crop-select"
         >

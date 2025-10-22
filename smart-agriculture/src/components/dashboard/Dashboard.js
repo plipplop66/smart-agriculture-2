@@ -11,7 +11,7 @@ import ManualInput from '../manual/ManualInput';
 import DemoModeToggle from '../demo/DemoModeToggle';
 import cropConditions from '../../data/cropConditions';
 
-const Dashboard = () => {
+const Dashboard = ({ isDemoActive: isDemoActiveProp = true }) => {
   const { translate } = useLanguage();
   const [sensorData, setSensorData] = useState({
     soilMoisture: 45,
@@ -19,31 +19,10 @@ const Dashboard = () => {
     humidity: 65
   });
   
-  const [weatherData, setWeatherData] = useState({
-    current: {
-      condition: 'Partly Cloudy',
-      temperature: 27,
-      humidity: 62,
-      windSpeed: 12
-    },
-    forecast: {
-      today: {
-        condition: 'Partly Cloudy',
-        maxTemp: 30,
-        minTemp: 22,
-        rainChance: 20
-      },
-      tomorrow: {
-        condition: 'Rainy',
-        maxTemp: 26,
-        minTemp: 20,
-        rainChance: 70
-      }
-    }
-  });
+  
   
   const [loading, setLoading] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(isDemoActiveProp);
   const [selectedCrop, setSelectedCrop] = useState('wheat');
   
   // Simulate fetching data from API
@@ -68,53 +47,54 @@ const Dashboard = () => {
     
     fetchData();
     
-    // Simulate real-time updates only in demo mode with interdependence
+    // Simulate real-time updates with different behavior for demo/manual modes
     let interval;
-    if (isDemoMode) {
-      interval = setInterval(() => {
-        setSensorData(prevData => {
-          // Get crop-specific conditions
-          const crop = cropConditions[selectedCrop];
-          
-          // Calculate temperature change within crop-specific range
-          const tempChange = Math.random() * 2 - 1;
-          const newTemp = Math.max(
-            crop.temperature.min, 
-            Math.min(crop.temperature.max, prevData.temperature + tempChange)
-          );
-          
-          // Calculate humidity change within crop-specific range
-          const humidityChange = Math.random() * 4 - 2;
-          const newHumidity = Math.max(
-            crop.humidity.min, 
-            Math.min(crop.humidity.max, prevData.humidity + humidityChange)
-          );
-          
-          // Calculate soil moisture with interdependence
-          // Temperature increase causes moisture decrease (evaporation)
-          const evaporationEffect = tempChange > 0 ? -tempChange * 0.8 : 0;
-          
-          // Humidity increase causes moisture increase (water retention)
-          const humidityEffect = humidityChange > 0 ? humidityChange * 0.3 : 0;
-          
-          // Random factor for natural variation
-          const randomFactor = Math.random() * 2 - 1;
-          
-          // Calculate new soil moisture within crop-specific range
-          const moistureChange = evaporationEffect + humidityEffect + randomFactor;
-          const newMoisture = Math.max(
-            crop.soilMoisture.min, 
-            Math.min(crop.soilMoisture.max, prevData.soilMoisture + moistureChange)
-          );
-          
+    interval = setInterval(() => {
+      setSensorData(prevData => {
+        const crop = cropConditions[selectedCrop];
+
+        if (isDemoMode) {
+          // In demo mode, generate completely random values within crop's ranges
+          const minT = crop.temperature.min;
+          const maxT = crop.temperature.max;
+          const newTemp = +(Math.random() * (maxT - minT) + minT).toFixed(2);
+
+          const humOptMid = (crop.humidity.optimal[0] + crop.humidity.optimal[1]) / 2;
+          const tempOptMid = (crop.temperature.optimal[0] + crop.temperature.optimal[1]) / 2;
+          const tempDiff = newTemp - tempOptMid;
+
+          let newHumidity = humOptMid - tempDiff * 0.6 + (Math.random() * 4 - 2);
+          newHumidity = Math.max(crop.humidity.min, Math.min(crop.humidity.max, +newHumidity.toFixed(2)));
+
+          const moistOptMid = (crop.soilMoisture.optimal[0] + crop.soilMoisture.optimal[1]) / 2;
+          let newMoisture = moistOptMid + (newHumidity - humOptMid) * 0.35 - tempDiff * 0.25 + (Math.random() * 3 - 1.5);
+          newMoisture = Math.max(crop.soilMoisture.min, Math.min(crop.soilMoisture.max, +newMoisture.toFixed(2)));
+
           return {
             soilMoisture: newMoisture,
             temperature: newTemp,
             humidity: newHumidity
           };
-        });
-      }, 3000); // Update every 3 seconds for more dynamic simulation
-    }
+        } else {
+          // In manual mode, make small variations around the manually entered values
+          const tempVariation = (Math.random() * 0.4 - 0.2); // ±0.2°C
+          const humidityVariation = (Math.random() * 1 - 0.5); // ±0.5%
+          const moistureVariation = (Math.random() * 0.6 - 0.3); // ±0.3%
+
+          return {
+            soilMoisture: Math.max(crop.soilMoisture.min, 
+              Math.min(crop.soilMoisture.max, 
+                +(prevData.soilMoisture + moistureVariation).toFixed(2))),
+            temperature: Math.max(crop.temperature.min,
+              Math.min(crop.temperature.max,
+                +(prevData.temperature + tempVariation).toFixed(2))),
+            humidity: Math.max(crop.humidity.min,
+              Math.min(crop.humidity.max,
+                +(prevData.humidity + humidityVariation).toFixed(2)))
+          };
+        }
+      });
+    }, 3000); // Update every 3 seconds
     
     return () => {
       if (interval) clearInterval(interval);
@@ -159,7 +139,7 @@ const Dashboard = () => {
         />
       )}
       
-      <Simulator />
+  <Simulator selectedCrop={selectedCrop} sensorData={sensorData} />
       
       <div className="row">
         <div className="col-md-4">
@@ -168,19 +148,23 @@ const Dashboard = () => {
             <div className="sensor-value">{sensorData.soilMoisture.toFixed(2)}%</div>
             <div className="sensor-label">{translate('dashboard.soilMoisture')}</div>
             {sensorData.soilMoisture < cropConditions[selectedCrop].soilMoisture.optimal[0] && (
-              <div className="alert alert-danger mt-3">
-                ⚠ {translate('dashboard.lowMoisture')} — {translate('dashboard.irrigationNeeded')}
+              <div className="alert alert-warning mt-3">
+                ⚠️ {translate('dashboard.lowMoisture')} — {translate('dashboard.irrigationNeeded')}
               </div>
             )}
             {sensorData.soilMoisture >= cropConditions[selectedCrop].soilMoisture.optimal[0] && 
              sensorData.soilMoisture <= cropConditions[selectedCrop].soilMoisture.optimal[1] && (
               <div className="alert alert-success mt-3">
-                🌧 {translate('dashboard.moistureOptimal')}
+                ✅ {translate('dashboard.moistureOptimal')}
               </div>
             )}
             {sensorData.soilMoisture > cropConditions[selectedCrop].soilMoisture.optimal[1] && (
               <div className="alert alert-warning mt-3">
-                💧 {cropConditions[selectedCrop].soilMoisture.description}
+                ⚠️ {(() => {
+                  const key = `crop.${selectedCrop}.soilMoisture.description`;
+                  const text = translate(key);
+                  return text === key ? cropConditions[selectedCrop].soilMoisture.description : text;
+                })()}
               </div>
             )}
           </div>
@@ -194,7 +178,11 @@ const Dashboard = () => {
             {(sensorData.temperature < cropConditions[selectedCrop].temperature.optimal[0] || 
               sensorData.temperature > cropConditions[selectedCrop].temperature.optimal[1]) && (
               <div className="alert alert-warning mt-3">
-                🌡️ {cropConditions[selectedCrop].temperature.description}
+                ⚠️ {(() => {
+                  const key = `crop.${selectedCrop}.temperature.description`;
+                  const text = translate(key);
+                  return text === key ? cropConditions[selectedCrop].temperature.description : text;
+                })()}
               </div>
             )}
             {sensorData.temperature >= cropConditions[selectedCrop].temperature.optimal[0] && 
@@ -214,74 +202,37 @@ const Dashboard = () => {
             {(sensorData.humidity < cropConditions[selectedCrop].humidity.optimal[0] || 
               sensorData.humidity > cropConditions[selectedCrop].humidity.optimal[1]) && (
               <div className="alert alert-warning mt-3">
-                💨 {cropConditions[selectedCrop].humidity.description}
+                ⚠️ {(() => {
+                  const key = `crop.${selectedCrop}.humidity.description`;
+                  const text = translate(key);
+                  return text === key ? cropConditions[selectedCrop].humidity.description : text;
+                })()}
               </div>
             )}
             {sensorData.humidity >= cropConditions[selectedCrop].humidity.optimal[0] && 
              sensorData.humidity <= cropConditions[selectedCrop].humidity.optimal[1] && (
               <div className="alert alert-success mt-3">
-                ✅ Optimal humidity for {cropConditions[selectedCrop].name}
+                ✅ {(() => {
+                  const tmpl = translate('dashboard.optimalHumidityFor');
+                  const cropName = translate(`crops.${selectedCrop}`) || cropConditions[selectedCrop].name;
+                  return tmpl === 'dashboard.optimalHumidityFor' ? `Optimal humidity for ${cropName}` : tmpl.replace('{crop}', cropName);
+                })()}
               </div>
             )}
           </div>
         </div>
       </div>
       
-      <div className="weather-section">
-        <h2 className="weather-title">Weather Forecast</h2>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="weather-card current">
-              <h3>Current Weather</h3>
-              <div className="weather-info">
-                <div className="weather-temp">{weatherData.current.temperature}°C</div>
-                <div className="weather-condition">{weatherData.current.condition}</div>
-                <div className="weather-details">
-                  <div>Humidity: {weatherData.current.humidity}%</div>
-                  <div>Wind: {weatherData.current.windSpeed} km/h</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-md-3">
-            <div className="weather-card forecast">
-              <h3>Today</h3>
-              <div className="forecast-temp">
-                <span className="max-temp">{weatherData.forecast.today.maxTemp}°C</span>
-                <span className="min-temp">{weatherData.forecast.today.minTemp}°C</span>
-              </div>
-              <div className="forecast-condition">{weatherData.forecast.today.condition}</div>
-              <div className="rain-chance">
-                <FaTint /> {weatherData.forecast.today.rainChance}%
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-md-3">
-            <div className="weather-card forecast">
-              <h3>Tomorrow</h3>
-              <div className="forecast-temp">
-                <span className="max-temp">{weatherData.forecast.tomorrow.maxTemp}°C</span>
-                <span className="min-temp">{weatherData.forecast.tomorrow.minTemp}°C</span>
-              </div>
-              <div className="forecast-condition">{weatherData.forecast.tomorrow.condition}</div>
-              <div className="rain-chance">
-                <FaTint /> {weatherData.forecast.tomorrow.rainChance}%
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       
-      <IrrigationSystem soilMoisture={sensorData.soilMoisture} rainChance={weatherData.forecast.today.rainChance} />
+      
+  <IrrigationSystem soilMoisture={sensorData.soilMoisture} rainChance={0} />
       
       <div className="row">
         <div className="col-md-6">
-          <NutritionAnalysis />
+          <NutritionAnalysis selectedCrop={selectedCrop} sensorData={sensorData} />
         </div>
         <div className="col-md-6">
-          <CropProgress />
+          <CropProgress selectedCrop={selectedCrop} sensorData={sensorData} />
         </div>
       </div>
     </div>

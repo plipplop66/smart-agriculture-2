@@ -1,8 +1,10 @@
 import React from 'react';
 import { FaGithub, FaLinkedin, FaEnvelope, FaUniversity } from 'react-icons/fa';
 import './About.css';
+import { useLanguage } from '../../context/LanguageContext';
 
 const About = () => {
+  const { translate } = useLanguage();
   // Sample team members data
   const teamMembers = [
     {
@@ -49,39 +51,37 @@ const About = () => {
         <div className="college-logo">
           <FaUniversity className="college-icon" />
         </div>
-        <h1 className="about-title">Smart Agriculture Project</h1>
-        <p className="about-subtitle">A Final Year Project by Computer Science Department</p>
+  <h1 className="about-title">{translate('about.title')}</h1>
+  <p className="about-subtitle">{translate('about.subtitle')}</p>
       </div>
 
       <div className="about-section">
-        <h2>Project Overview</h2>
+        <h2>{translate('about.overviewTitle')}</h2>
         <p>
-          The Smart Agriculture platform is designed to help farmers leverage technology for improved crop management, 
-          resource optimization, and sustainable farming practices. Our solution integrates real-time sensor data, 
-          weather forecasts, and agricultural expertise to provide actionable insights for modern farming.
+          {translate('about.overviewText')}
         </p>
         <div className="project-features">
           <div className="feature">
-            <h3>Real-time Monitoring</h3>
-            <p>Track soil moisture, temperature, and humidity with IoT sensors</p>
+            <h3>{translate('about.features.realTime.title')}</h3>
+            <p>{translate('about.features.realTime.desc')}</p>
           </div>
           <div className="feature">
-            <h3>Smart Irrigation</h3>
-            <p>Optimize water usage based on soil conditions and weather forecasts</p>
+            <h3>{translate('about.features.irrigation.title')}</h3>
+            <p>{translate('about.features.irrigation.desc')}</p>
           </div>
           <div className="feature">
-            <h3>Pest Management</h3>
-            <p>Get timely recommendations for pest control based on crop type</p>
+            <h3>{translate('about.features.pest.title')}</h3>
+            <p>{translate('about.features.pest.desc')}</p>
           </div>
           <div className="feature">
-            <h3>Agricultural Resources</h3>
-            <p>Access farming tips, government schemes, and expert consultation</p>
+            <h3>{translate('about.features.resources.title')}</h3>
+            <p>{translate('about.features.resources.desc')}</p>
           </div>
         </div>
       </div>
 
       <div className="technologies-section">
-        <h2>Technologies Used</h2>
+  <h2>{translate('about.technologiesTitle')}</h2>
         <div className="tech-stack">
           <div className="tech">
             <h3>Frontend</h3>
@@ -121,17 +121,15 @@ const About = () => {
       </div>
 
       <div className="acknowledgements">
-        <h2>Acknowledgements</h2>
+        <h2>{translate('about.acknowledgementsTitle')}</h2>
         <p>
-          We would like to thank our project guide, Prof. Rajesh Verma, for his valuable guidance and support throughout 
-          the development of this project. We also extend our gratitude to the Department of Computer Science for providing 
-          the resources and infrastructure needed for this project.
+          {translate('about.acknowledgementsText')}
         </p>
       </div>
 
       <footer className="about-footer">
-        <p>&copy; 2023 Smart Agriculture Project | Computer Science Department</p>
-        <p>All Rights Reserved</p>
+        <p>{translate('about.footerLine1')}</p>
+        <p>{translate('about.footerLine2')}</p>
       </footer>
     </div>
   );

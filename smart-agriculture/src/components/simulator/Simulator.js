@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { FaPlay, FaTint, FaFlask, FaSeedling } from 'react-icons/fa';
 import './Simulator.css';
 
@@ -8,11 +9,13 @@ const Simulator = () => {
   const [simulationResults, setSimulationResults] = useState(null);
   const [progress, setProgress] = useState(0);
 
+  const { translate } = useLanguage();
+
   const simulationSteps = [
-    "Detecting moisture...",
-    "Calculating irrigation needs...",
-    "Determining fertilizer requirements...",
-    "Applying irrigation and fertilizer..."
+    translate('sim.steps.detect'),
+    translate('sim.steps.calculateIrrigation'),
+    translate('sim.steps.determineFertilizer'),
+    translate('sim.steps.apply')
   ];
 
   const runSimulation = () => {
@@ -65,16 +68,16 @@ const Simulator = () => {
 
   return (
     <div className="simulator-container">
-      <h2 className="simulator-title">Smart Agriculture Simulator</h2>
+  <h2 className="simulator-title">{translate('simulator.title')}</h2>
       
       {!isSimulating && !simulationResults && (
         <div className="simulator-intro">
-          <p>Run a virtual simulation of the smart agriculture system</p>
+          <p>{translate('sim.intro')}</p>
           <button 
             className="simulator-button"
             onClick={runSimulation}
           >
-            <FaPlay className="button-icon" /> Run Simulator
+            <FaPlay className="button-icon" /> {translate('sim.run')}
           </button>
         </div>
       )}
@@ -93,25 +96,25 @@ const Simulator = () => {
       
       {simulationResults && (
         <div className="simulation-results">
-          <h3>Simulation Results</h3>
+          <h3>{translate('sim.resultsTitle')}</h3>
           
           <div className="results-grid">
             <div className="result-item">
               <FaTint className="result-icon" />
               <div className="result-value">{simulationResults.soilMoisture}%</div>
-              <div className="result-label">Soil Moisture</div>
+              <div className="result-label">{translate('dashboard.soilMoisture')}</div>
             </div>
             
             <div className="result-item">
               <FaFlask className="result-icon" />
               <div className="result-value">{simulationResults.waterLevel} L</div>
-              <div className="result-label">Water Applied</div>
+              <div className="result-label">{translate('sim.waterApplied')}</div>
             </div>
             
             <div className="result-item">
               <FaSeedling className="result-icon" />
               <div className="result-value">{simulationResults.fertilizerAmount} units</div>
-              <div className="result-label">Fertilizer Applied</div>
+              <div className="result-label">{translate('sim.fertilizerApplied')}</div>
             </div>
           </div>
           
@@ -120,7 +123,7 @@ const Simulator = () => {
               className="simulator-button restart-button"
               onClick={runSimulation}
             >
-              <FaPlay className="button-icon" /> Run Again
+              <FaPlay className="button-icon" /> {translate('sim.runAgain')}
             </button>
           )}
         </div>

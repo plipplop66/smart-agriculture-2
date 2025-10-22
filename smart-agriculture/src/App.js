@@ -7,14 +7,12 @@ import Signup from './components/auth/Signup';
 import Pesticides from './components/pesticides/Pesticides';
 import MoreInfo from './components/moreinfo/MoreInfo';
 import About from './components/about/About';
-import DemoMode from './components/demo/DemoMode';
 import { LanguageProvider } from './context/LanguageContext';
 import './App.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isDemoActive, setIsDemoActive] = useState(true); // Demo mode enabled by default
   
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -39,9 +37,6 @@ function App() {
     setIsAuthenticated(false);
   };
   
-  const toggleDemo = () => {
-    setIsDemoActive(!isDemoActive);
-  };
   
   if (loading) {
     return <div className="loading-container"><div className="loading"></div></div>;
@@ -56,7 +51,7 @@ function App() {
             <Routes>
               <Route 
                 path="/" 
-                element={isAuthenticated ? <Dashboard isDemoActive={isDemoActive} /> : <Navigate to="/login" />} 
+                element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
               />
               <Route 
                 path="/login" 
@@ -68,7 +63,7 @@ function App() {
               />
               <Route 
                 path="/pesticides" 
-                element={isAuthenticated ? <Pesticides isDemoActive={isDemoActive} /> : <Navigate to="/login" />} 
+                element={isAuthenticated ? <Pesticides /> : <Navigate to="/login" />} 
               />
               <Route 
                 path="/more-info" 
@@ -79,7 +74,6 @@ function App() {
                 element={isAuthenticated ? <About /> : <Navigate to="/login" />} 
               />
             </Routes>
-            {isAuthenticated && <DemoMode isDemoActive={isDemoActive} toggleDemo={toggleDemo} />}
           </div>
         </div>
       </Router>

@@ -41,11 +41,7 @@ const DemoMode = ({ isDemoActive, toggleDemo }) => {
         </div>
       )}
       
-      {isDemoActive && (
-        <div className="demo-badge">
-          Demo Mode Active - Using Simulated Data
-        </div>
-      )}
+      {/* Demo badge removed — keep toggle and info panel only */}
     </div>
   );
 };

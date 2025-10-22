@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTint, FaFillDrip } from 'react-icons/fa';
 import './IrrigationSystem.css';
+import { useLanguage } from '../../context/LanguageContext';
 
 const IrrigationSystem = ({ soilMoisture, rainChance }) => {
   const [waterLevel, setWaterLevel] = useState(80);
@@ -66,20 +67,22 @@ const IrrigationSystem = ({ soilMoisture, rainChance }) => {
     return Math.round(10 * moistureFactor * rainFactor);
   };
   
+  const { translate } = useLanguage();
+
   return (
     <div className="irrigation-container">
-      <h2 className="irrigation-title">Smart Irrigation System</h2>
+      <h2 className="irrigation-title">{translate('irrigation.title')}</h2>
       
       {showAlert && (
         <div className="alert alert-danger">
-          <FaTint /> Irrigation Required! Soil moisture is low.
+          <FaTint /> {translate('irrigation.alert')}
         </div>
       )}
       
       <div className="row">
         <div className="col-md-6">
           <div className="water-tank-container">
-            <h3>Water Tank Level</h3>
+            <h3>{translate('irrigation.waterLevel')}</h3>
             <div className="water-tank">
               <div 
                 className="water-level" 
@@ -92,23 +95,23 @@ const IrrigationSystem = ({ soilMoisture, rainChance }) => {
               onClick={refillWaterTank}
               disabled={waterLevel === 100}
             >
-              Refill Tank
+              {translate('irrigation.refill')}
             </button>
           </div>
         </div>
         
         <div className="col-md-6">
           <div className="irrigation-controls">
-            <h3>Irrigation Controls</h3>
+            <h3>{translate('irrigation.controls')}</h3>
             <div className="irrigation-info">
               <p>
-                <strong>Current Soil Moisture:</strong> {soilMoisture}%
+                <strong>{translate('irrigation.currentSoilMoisture')}:</strong> {soilMoisture}%
               </p>
               <p>
-                <strong>Chance of Rain:</strong> {rainChance}%
+                <strong>{translate('irrigation.chanceOfRain')}:</strong> {rainChance}%
               </p>
               <p>
-                <strong>Irrigation Needed:</strong> {calculateIrrigationNeeded()} minutes
+                <strong>{translate('irrigation.irrigationNeeded')}:</strong> {calculateIrrigationNeeded()} minutes
               </p>
             </div>
             
@@ -117,7 +120,7 @@ const IrrigationSystem = ({ soilMoisture, rainChance }) => {
               onClick={startIrrigation}
               disabled={isIrrigating}
             >
-              {isIrrigating ? 'Irrigating...' : 'Start Irrigation'}
+              {isIrrigating ? translate('irrigation.irrigating') : translate('irrigation.start')}
             </button>
             
             {isIrrigating && (
